@@ -68,9 +68,12 @@ Vector GetCamPos(uintptr_t ent)
 uint64_t aimentity = 0;
 void aimthread() 
 {	
-	while (true) 
+	while (!(GetKeyState(0x73) & 0x8000))
 	{		
-		if (!(GetKeyState(0x06) & 0x8000)) 
+		int aimkey = 0x06;
+		int out = sscanf(s_Aimkey, "%d", &aimkey);
+		
+		if (!(GetKeyState(aimkey) & 0x8000) || !s_Aim) 
 		{
 			Sleep(10);
 			continue;
@@ -90,8 +93,24 @@ void aimthread()
 		Vector CalculatedAngles = *(Vector*)(&(angle));
 
 		Vector Delta = (CalculatedAngles - ViewAngles); // / SMOOTH;
+
+		if (s_Smooth != 0)
+		{
+			Delta = (CalculatedAngles - ViewAngles) / s_Smooth;
+		}
+
 		Vector puredelta = CalculatedAngles - ViewAngles;
 		Vector SmoothedAngles = ViewAngles + Delta;
+
+		if (s_Recoil) 
+		{
+			Vector RecoilVec = driver::read<Vector>(g_Sock, g_PID, localent + OFFSET_AIMPUNCH);
+			if (RecoilVec.x != 0 || RecoilVec.y != 0) 
+			{
+				SmoothedAngles -= RecoilVec;
+			}
+				
+		}
 
 		SetViewAngles(localent, SmoothedAngles);
 
@@ -100,7 +119,7 @@ void aimthread()
 }
 
 int main()
-{
+{	
 	Console::PrintTitle("aaaapex");
 
 	Console::Info("Connecting to driver...");
@@ -142,6 +161,8 @@ int main()
 	Console::Info("Running threads...");
 	Console::Debug("Aimbot thread...");
 	std::thread taim(aimthread);
+	Console::Debug("GUI thread...");
+	std::thread tgui(rungui);
 
 	//dump(g_Base, 3221225472, 8);
 
@@ -186,36 +207,50 @@ int main()
 				continue;
 
 			int shield = driver::read<int>(g_Sock, g_PID, centity + OFFSET_SHIELD);
-			int total = health + shield;
-			
+			int total = health + shield;		
+
 			float green = 0;
 			float red = 0;
 			float blue = 0;
-			if (total > 100)
+
+			if (s_Health) 
 			{
-				total -= 100;
-				blue = (float)total / 125.f;
-				green = (125.f - (float)total) / 125.f;
+				if (s_Shield) 
+				{
+					if (total > 100)
+					{
+						total -= 100;
+						blue = (float)total / 125.f;
+						green = (125.f - (float)total) / 125.f;
+					}
+					else
+					{
+						green = (float)total / 100.f;
+						red = (100.f - (float)total) / 100.f;
+					}
+				}
+				else 
+				{
+					green = (float)total / 100.f;
+					red = (100.f - (float)total) / 100.f;
+				}
 			}
-			else 
+
+			if (s_Glow) 
 			{
-				green = (float)total / 100.f;
-				red = (100.f - (float)total) / 100.f;
+				driver::write(g_Sock, g_PID, centity + OFFSET_GLOW_ENABLE, true);
+				driver::write(g_Sock, g_PID, centity + OFFSET_GLOW_CONTEXT, 1);
+
+				// TODO: Color by health
+				driver::write(g_Sock, g_PID, centity + OFFSET_GLOW_COLORS, red);
+				driver::write(g_Sock, g_PID, centity + OFFSET_GLOW_COLORS + 0x4, green);
+				driver::write(g_Sock, g_PID, centity + OFFSET_GLOW_COLORS + 0x8, blue);
+
+				for (int offset = 0x2D0; offset <= 0x2E8; offset += 0x4)
+					driver::write(g_Sock, g_PID, centity + offset, FLT_MAX);
+
+				driver::write(g_Sock, g_PID, centity + OFFSET_GLOW_RANGE, FLT_MAX);
 			}
-
-			driver::write(g_Sock, g_PID, centity + OFFSET_GLOW_ENABLE, true);
-			driver::write(g_Sock, g_PID, centity + OFFSET_GLOW_CONTEXT, 1);
-
-			// TODO: Color by health
-			driver::write(g_Sock, g_PID, centity + OFFSET_GLOW_COLORS, red);
-			driver::write(g_Sock, g_PID, centity + OFFSET_GLOW_COLORS + 0x4, green);
-			driver::write(g_Sock, g_PID, centity + OFFSET_GLOW_COLORS + 0x8, blue);
-
-			for (int offset = 0x2C8; offset <= 0x2E0; offset += 0x4)
-				driver::write(g_Sock, g_PID, centity + offset, FLT_MAX);
-
-			driver::write(g_Sock, g_PID, centity + OFFSET_GLOW_RANGE, FLT_MAX);
-			//driver::write(g_Sock, g_PID, centity + OFFSET_GLOW_MAGIC, 0x4D407D7E);
 
 			// ---------------------------------------------------------------
 			// AIMBOT PREPARATION

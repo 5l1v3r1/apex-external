@@ -22,6 +22,18 @@
 #include "driver.h"
 #include "offsets.h"
 
+extern bool s_Glow;
+extern bool s_Health;
+extern bool s_Shield;
+
+extern bool s_Aim;
+extern int s_Smooth;
+extern bool s_Recoil;
+
+extern char s_Aimkey[256];
+
+#include "gui.h"
+
 extern SOCKET g_Sock; 
 extern DWORD g_PID; 
 extern uint64_t g_Base; 
