@@ -5,3 +5,5 @@
                      |_|            
 
 External cheat for Apex Legends. It uses socket r/w driver and it is made to be usable.
+
+Written in 35 mins total. Be nice.
