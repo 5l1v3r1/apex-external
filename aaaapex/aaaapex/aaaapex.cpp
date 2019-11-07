@@ -108,8 +108,19 @@ void aimthread()
 			if (RecoilVec.x != 0 || RecoilVec.y != 0) 
 			{
 				SmoothedAngles -= RecoilVec;
-			}
-				
+			}				
+		}
+
+		if (abs(puredelta.y) > s_FOV || abs(puredelta.x) > s_FOV)
+		{
+			g_Locked = false;
+			continue;
+		}
+
+		if (localent < 0x77359400) 
+		{
+			g_Locked = false;
+			continue;
 		}
 
 		SetViewAngles(localent, SmoothedAngles);
@@ -120,14 +131,18 @@ void aimthread()
 
 int main()
 {	
+	JUNK();
 	Console::PrintTitle("aaaapex");
 
+	JUNK();
 	Console::Info("Connecting to driver...");
 	
+	JUNK();
 	Console::Debug("Initializing...");
 	driver::initialize();
 	g_Locked = false;
 
+	JUNK();
 	Console::Debug("Connecting...");
 	g_Sock = driver::connect();
 	if (g_Sock == INVALID_SOCKET)
@@ -136,8 +151,10 @@ int main()
 		Console::WaitAndExit();
 	}
 
+	JUNK();
 	Console::Info("Getting PID of game...");
 
+	JUNK();
 	Console::Debug("Getting PID using CreateToolhelp32Snapshot...");
 	g_PID = Utils::GetPID(L"r5apex.exe");
 	if (g_PID == 0) 
@@ -147,8 +164,10 @@ int main()
 	}
 	Console::Debug("Game PID should be %u.", g_PID);
 
+	JUNK();
 	Console::Info("Getting base address...");
 
+	JUNK();
 	Console::Debug("Using driver to obtain base...");
 	g_Base = driver::get_process_base_address(g_Sock, g_PID);
 	if (g_Base == 0) 
@@ -158,16 +177,19 @@ int main()
 	}
 	Console::Debug("Base address should be %llx.", g_Base);
 
+	JUNK();
 	Console::Info("Running threads...");
 	Console::Debug("Aimbot thread...");
 	std::thread taim(aimthread);
 	Console::Debug("GUI thread...");
 	std::thread tgui(rungui);
 
+	JUNK();
 	//dump(g_Base, 3221225472, 8);
 
 	while (!(GetKeyState(0x73) & 0x8000)) // F4
 	{
+		JUNK();
 		Sleep(1);
 		uint64_t entitylist = g_Base + OFFSET_ENTITYLIST;
 
@@ -280,9 +302,11 @@ int main()
 		g_Locked = false;
 	}
 	
+	JUNK();
 	Console::Debug("Deinitializing...");
 	driver::deinitialize();
 
+	JUNK();
 	std::cout << "Press any key to exit...\n";
 	Console::WaitForInput();
 	return 0;

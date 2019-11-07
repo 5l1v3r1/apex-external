@@ -15,6 +15,10 @@
 #include <cmath>
 #include <thread>
 
+#pragma warning(disable : 4244)
+#pragma warning(disable : 4267)
+
+#include "junk.h"
 #include "vector.h"
 #include "math.h"
 #include "console.h"
@@ -28,6 +32,7 @@ extern bool s_Shield;
 
 extern bool s_Aim;
 extern int s_Smooth;
+extern int s_FOV;
 extern bool s_Recoil;
 
 extern char s_Aimkey[256];

@@ -18,6 +18,7 @@ bool s_Shield = true;
 
 bool s_Aim = true;
 int s_Smooth = 0;
+int s_FOV = 45;
 bool s_Recoil = false;
 
 char s_Aimkey[256];
@@ -131,9 +132,10 @@ int rungui()
 		ImGui::Text("AIM");
 		ImGui::Checkbox("Enable aim", &s_Aim);
 		
-		ImGui::InputText("Aim key (int)", s_Aimkey, 4);
+		ImGui::InputText("Aim key (int)", s_Aimkey, 15);
 
 		ImGui::SliderInt("Smoothness", &s_Smooth, 0, 5);
+		ImGui::SliderInt("FOV", &s_FOV, 1, 180);
 		ImGui::Checkbox("Enable recoil control", &s_Recoil);
 		ImGui::End();
 

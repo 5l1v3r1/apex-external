@@ -1,9 +1,12 @@
 #include "driver.h"
 #include "server_shared.h"
 #include "lock.h"
+#include "junk.h"
 
 // Link to winsock.
 #pragma comment(lib, "Ws2_32")
+
+#pragma warning(disable : 4267)
 
 // Send request packet and wait for completion.
 static bool send_packet(
@@ -57,17 +60,20 @@ static uint32_t copy_memory(
 
 void driver::initialize()
 {
+	JUNK();
 	WSADATA wsa_data;
 	WSAStartup(MAKEWORD(2, 2), &wsa_data);
 }
 
 void driver::deinitialize()
 {
+	JUNK();
 	WSACleanup();
 }
 
 SOCKET driver::connect()
 {
+	JUNK();
 	SOCKADDR_IN address{ };
 
 	address.sin_family = AF_INET;
@@ -78,6 +84,7 @@ SOCKET driver::connect()
 	if (connection == INVALID_SOCKET)
 		return INVALID_SOCKET;
 
+	JUNK();
 	if (connect(connection, (SOCKADDR*)&address, sizeof(address)) == SOCKET_ERROR)
 	{
 		closesocket(connection);
@@ -89,6 +96,7 @@ SOCKET driver::connect()
 
 void driver::disconnect(const SOCKET connection)
 {
+	JUNK();
 	closesocket(connection);
 }
 
@@ -114,11 +122,13 @@ uint32_t driver::write_memory(
 
 uint64_t driver::get_process_base_address(const SOCKET connection, const uint32_t process_id)
 {
+	JUNK();
 	Packet packet{ };
 
 	packet.header.magic = packet_magic;
 	packet.header.type = PacketType::packet_get_base_address;
 
+	JUNK();
 	auto& data = packet.data.get_base_address;
 	data.process_id = process_id;
 
